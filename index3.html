@@ -1,0 +1,2713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Building AI Agents: A Practical Field Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,300&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink: #0f0f0f;
+    --ink-mid: #3a3a3a;
+    --ink-light: #5a5a5a;
+    --ink-faint: #8a8a8a;
+    --bg: #ffffff;
+    --bg-warm: #fafaf8;
+    --bg-tint: #f4f4f0;
+    --rule: #e0ddd8;
+
+    /* Blue replaces the former orange accent throughout */
+    --accent: #1a4fc8;
+    --accent-soft: #e9eef5;
+
+    --blue: #1a4fc8;
+    --blue-soft: #e9eef5;
+    --green: #166534;
+    --green-soft: #dcfce7;
+    --amber: #92400e;
+    --amber-soft: #fef3c7;
+    --purple: #5b21b6;
+    --purple-soft: #ede9fe;
+
+    --type-display: 'Playfair Display', Georgia, serif;
+    --type-body: 'Source Serif 4', Georgia, serif;
+    --type-mono: 'IBM Plex Mono', 'Courier New', monospace;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--type-body);
+    font-size: 17px;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Skip link for keyboard users */
+  .skip-link {
+    position: absolute;
+    top: -999px;
+    left: 0;
+    background: var(--accent);
+    color: #fff;
+    padding: 0.5rem 1rem;
+    font-family: var(--type-mono);
+    font-size: 12px;
+    z-index: 9999;
+    text-decoration: none;
+    border-radius: 0 0 4px 0;
+  }
+  .skip-link:focus { top: 0; }
+
+  /* NAV */
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(255,255,255,0.97);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--rule);
+    padding: 0 2rem;
+  }
+  .nav-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+    gap: 1rem;
+  }
+  .nav-brand {
+    font-family: var(--type-mono);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ink-light);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    text-decoration: none;
+  }
+  .nav-brand:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+  .nav-scroll {
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    position: relative;
+    z-index: 101;
+  }
+  .nav-scroll::-webkit-scrollbar { display: none; }
+  .nav-links {
+    display: flex;
+    gap: 0;
+    list-style: none;
+    min-width: max-content;
+  }
+  .nav-links a {
+    display: block;
+    padding: 0 1rem;
+    height: 56px;
+    line-height: 56px;
+    font-family: var(--type-mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-light);
+    text-decoration: none;
+    white-space: nowrap;
+    transition: color 0.2s;
+    border-bottom: 2px solid transparent;
+  }
+  .nav-links a:hover,
+  .nav-links a:focus-visible {
+    color: var(--ink);
+    border-bottom-color: var(--accent);
+    outline: none;
+  }
+
+  /* HERO */
+  .hero {
+    background: var(--bg);
+    border-bottom: 1px solid var(--rule);
+    padding: 5rem 2rem 4rem;
+  }
+  .hero-inner {
+    max-width: 860px;
+    margin: 0 auto;
+  }
+  .hero-eyebrow {
+    font-family: var(--type-mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 1.25rem;
+  }
+  .hero h1 {
+    font-family: var(--type-display);
+    font-size: clamp(2.8rem, 6vw, 4.5rem);
+    font-weight: 900;
+    line-height: 1.08;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    margin-bottom: 1.5rem;
+  }
+  .hero h1 em {
+    font-style: italic;
+    color: var(--accent);
+  }
+  .hero-sub {
+    font-size: 1.15rem;
+    color: var(--ink-mid);
+    font-weight: 300;
+    max-width: 640px;
+    line-height: 1.6;
+    margin-bottom: 2.5rem;
+  }
+  .hero-meta {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+  .hero-meta-item {
+    font-family: var(--type-mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+  }
+  .hero-meta-item strong {
+    display: block;
+    color: var(--ink-mid);
+    font-weight: 500;
+    margin-bottom: 2px;
+  }
+
+  /* PAGE LAYOUT */
+  .page-wrap {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 2rem;
+  }
+
+  /* SECTION */
+  section {
+    padding: 4rem 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  section:last-child { border-bottom: none; }
+
+  .section-label {
+    font-family: var(--type-mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 0.5rem;
+  }
+  .section-title {
+    font-family: var(--type-display);
+    font-size: clamp(1.8rem, 3vw, 2.4rem);
+    font-weight: 700;
+    line-height: 1.15;
+    margin-bottom: 0.75rem;
+    color: var(--ink);
+  }
+  .section-intro {
+    font-size: 1.05rem;
+    color: var(--ink-mid);
+    font-weight: 300;
+    max-width: 680px;
+    margin-bottom: 2.5rem;
+    line-height: 1.65;
+  }
+
+  /* TWO COL */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+  }
+  @media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
+
+  .three-col {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;
+  }
+  @media (max-width: 900px) { .three-col { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 560px) { .three-col { grid-template-columns: 1fr; } }
+
+  /* DEFINITION CARDS */
+  .def-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--rule);
+    border: 1px solid var(--rule);
+    margin-bottom: 2rem;
+  }
+  @media (max-width: 700px) { .def-grid { grid-template-columns: 1fr; } }
+  .def-card {
+    background: var(--bg);
+    padding: 1.75rem;
+  }
+  .def-card-num {
+    font-family: var(--type-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--ink-faint);
+    margin-bottom: 0.75rem;
+  }
+  .def-card h3 {
+    font-family: var(--type-display);
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    line-height: 1.2;
+  }
+  .def-card p {
+    font-size: 0.95rem;
+    color: var(--ink-mid);
+    line-height: 1.6;
+  }
+  .def-card .tag {
+    display: inline-block;
+    margin-top: 1rem;
+    font-family: var(--type-mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 2px;
+    background: var(--bg-tint);
+    color: var(--ink-light);
+  }
+
+  /* AGENT TYPE CARDS */
+  .agent-card {
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    overflow: hidden;
+    background: var(--bg);
+    transition: box-shadow 0.2s;
+  }
+  .agent-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+  .agent-card-header {
+    padding: 1.5rem 1.75rem 1.25rem;
+    border-bottom: 1px solid var(--rule);
+  }
+  .agent-card-type {
+    font-family: var(--type-mono);
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+  .agent-card h3 {
+    font-family: var(--type-display);
+    font-size: 1.4rem;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 0.5rem;
+  }
+  .agent-card-desc {
+    font-size: 0.92rem;
+    color: var(--ink-mid);
+    line-height: 1.6;
+  }
+  .agent-card-body {
+    padding: 1.5rem 1.75rem;
+  }
+  .agent-card-body h4 {
+    font-family: var(--type-mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 0.75rem;
+  }
+  .tools-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin-bottom: 1.25rem;
+  }
+  .tools-list li {
+    font-size: 0.9rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    line-height: 1.4;
+    color: var(--ink-mid);
+  }
+  .tools-list li::before {
+    content: '\2192';
+    color: var(--ink-faint);
+    flex-shrink: 0;
+    font-family: var(--type-mono);
+    font-size: 0.8rem;
+    margin-top: 1px;
+  }
+  .use-cases {
+    background: var(--bg-tint);
+    border-radius: 3px;
+    padding: 1rem 1.25rem;
+  }
+  .use-cases h4 {
+    margin-bottom: 0.5rem;
+  }
+  .use-cases p {
+    font-size: 0.9rem;
+    color: var(--ink-mid);
+    line-height: 1.5;
+  }
+
+  /* COLOUR ACCENTS PER TYPE */
+  .type-user .agent-card-type { color: var(--blue); }
+  .type-user .agent-card-header {
+    border-left: 3px solid var(--blue);
+    padding-left: calc(1.75rem - 3px);
+  }
+  .type-workflow .agent-card-type { color: var(--green); }
+  .type-workflow .agent-card-header {
+    border-left: 3px solid var(--green);
+    padding-left: calc(1.75rem - 3px);
+  }
+  .type-autonomous .agent-card-type { color: var(--purple); }
+  .type-autonomous .agent-card-header {
+    border-left: 3px solid var(--purple);
+    padding-left: calc(1.75rem - 3px);
+  }
+
+  /* COMPARISON TABLE */
+  .comparison-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+  }
+  .comparison-table th {
+    font-family: var(--type-mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-light);
+    text-align: left;
+    padding: 0.75rem 1rem;
+    border-bottom: 2px solid var(--ink);
+    white-space: nowrap;
+  }
+  .comparison-table td {
+    padding: 0.9rem 1rem;
+    border-bottom: 1px solid var(--rule);
+    vertical-align: top;
+    line-height: 1.45;
+    color: var(--ink-mid);
+  }
+  .comparison-table td:first-child {
+    font-weight: 600;
+    color: var(--ink);
+    white-space: nowrap;
+  }
+  .comparison-table tr:hover td { background: var(--bg-warm); }
+  .table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+  }
+  .badge {
+    display: inline-block;
+    font-family: var(--type-mono);
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 2px 7px;
+    border-radius: 2px;
+    font-weight: 500;
+  }
+  .badge-low { background: var(--green-soft); color: var(--green); }
+  .badge-med { background: var(--amber-soft); color: var(--amber); }
+  .badge-high { background: var(--accent-soft); color: var(--accent); }
+  .badge-var { background: var(--bg-tint); color: var(--ink-light); }
+
+  /* DECISION GUIDE */
+  .decision-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+  }
+  @media (max-width: 700px) { .decision-grid { grid-template-columns: 1fr; } }
+  .decision-card {
+    background: var(--bg-warm);
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    padding: 1.5rem;
+  }
+  .decision-q {
+    font-family: var(--type-display);
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    line-height: 1.35;
+    color: var(--ink);
+  }
+  .decision-a {
+    font-size: 0.9rem;
+    color: var(--ink-mid);
+    line-height: 1.6;
+  }
+  .decision-a strong { color: var(--ink); }
+
+  /* COST SECTION */
+  .cost-row {
+    display: grid;
+    grid-template-columns: 200px 1fr auto;
+    gap: 1rem;
+    align-items: baseline;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--rule);
+    font-size: 0.92rem;
+  }
+  .cost-row:last-child { border-bottom: none; }
+  .cost-platform { font-weight: 600; color: var(--ink); }
+  .cost-detail { color: var(--ink-mid); line-height: 1.5; }
+  @media (max-width: 700px) {
+    .cost-row { grid-template-columns: 1fr; gap: 0.4rem; }
+  }
+
+  /* PLATFORM DETAIL CARDS */
+  .api-card {
+    background: var(--bg-tint);
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    padding: 1.5rem 1.75rem;
+    margin-bottom: 1rem;
+  }
+  .api-card h3 {
+    font-family: var(--type-display);
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: var(--ink);
+  }
+  .api-card p {
+    font-size: 0.92rem;
+    color: var(--ink-mid);
+    line-height: 1.6;
+    margin-bottom: 0.75rem;
+  }
+  .code-inline {
+    font-family: var(--type-mono);
+    font-size: 0.82rem;
+    background: #e8e5e0;
+    padding: 2px 6px;
+    border-radius: 2px;
+    color: var(--ink-mid);
+  }
+  .pros-cons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-top: 0.75rem;
+  }
+  @media (max-width: 560px) { .pros-cons { grid-template-columns: 1fr; } }
+  .pros, .cons {
+    font-size: 0.88rem;
+    line-height: 1.55;
+  }
+  .pros strong { color: var(--green); display: block; margin-bottom: 0.3rem; }
+  .cons strong { color: var(--amber); display: block; margin-bottom: 0.3rem; }
+  .pros ul, .cons ul {
+    list-style: none;
+    color: var(--ink-mid);
+  }
+  .pros ul li { padding-left: 1.2em; position: relative; }
+  .pros ul li::before {
+    content: '\2713';
+    color: var(--green);
+    position: absolute;
+    left: 0;
+  }
+  .cons ul li { padding-left: 1.2em; position: relative; }
+  .cons ul li::before {
+    content: '\2715';
+    color: var(--amber);
+    position: absolute;
+    left: 0;
+  }
+
+  /* CHECKLIST */
+  .checklist {
+    list-style: none;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+  }
+  @media (max-width: 600px) { .checklist { grid-template-columns: 1fr; } }
+  .checklist li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    font-size: 0.92rem;
+    line-height: 1.5;
+  }
+  .check-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    min-width: 22px;
+    border: 1.5px solid var(--rule);
+    border-radius: 3px;
+    flex-shrink: 0;
+    margin-top: 2px;
+    font-family: var(--type-mono);
+    font-size: 11px;
+    color: var(--ink-faint);
+  }
+  .checklist li .checklist-text strong {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 2px;
+    color: var(--ink);
+  }
+  .checklist li .checklist-text span {
+    display: block;
+    color: var(--ink-mid);
+    font-size: 0.85rem;
+  }
+
+  /* CALLOUT */
+  .callout {
+    border-left: 3px solid var(--accent);
+    padding: 1.25rem 1.5rem;
+    background: var(--accent-soft);
+    border-radius: 0 4px 4px 0;
+    margin: 2rem 0;
+    font-size: 0.92rem;
+    line-height: 1.65;
+    color: var(--ink-mid);
+  }
+  .callout strong { color: var(--ink); }
+
+  /* SCROLL REVEAL */
+  .reveal {
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* FOCUS STYLES */
+  a:focus-visible,
+  button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  /* SCROLL OFFSET: compensates for sticky nav so anchor links land correctly */
+  section[id], header[id] {
+    scroll-margin-top: 64px;
+  }
+
+  /* PRINT */
+  @media print {
+    nav { display: none; }
+    .hero { padding: 2rem 0; }
+    section { page-break-inside: avoid; }
+    .reveal { opacity: 1; transform: none; }
+  }
+</style>
+</head>
+<body>
+
+<a href="#main-content" class="skip-link">Skip to main content</a>
+
+<!-- NAV -->
+<nav role="navigation" aria-label="Page sections">
+  <div class="nav-inner">
+    <a href="#top" class="nav-brand">AI Agents: Field Guide</a>
+    <div class="nav-scroll"><ul class="nav-links" role="list">
+      <li><a href="#what">What is an agent?</a></li>
+      <li><a href="#types">Three types</a></li>
+      <li><a href="#platforms">Where to build</a></li>
+      <li><a href="#compare">Compare</a></li>
+      <li><a href="#costs">Costs</a></li>
+      <li><a href="#api">API approach</a></li>
+      <li><a href="#decide">Decision guide</a></li>
+      <li><a href="#checklist">Checklist</a></li>
+    </ul></div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<header id="top" class="hero">
+  <div class="hero-inner">
+    <p class="hero-eyebrow">AI and Product Transformation: Workshop Reference</p>
+    <h1>Building <em>AI Agents</em><br>A Practical Field Guide</h1>
+    <p class="hero-sub">Where to build, what to build, and what to think about before you start. Covering no-code builders through to developer frameworks and autonomous multi-agent systems.</p>
+    <div class="hero-meta" role="list" aria-label="Document metadata">
+      <div class="hero-meta-item" role="listitem"><strong>Audience</strong>Product, tech and business teams</div>
+      <div class="hero-meta-item" role="listitem"><strong>Level</strong>Introductory to intermediate</div>
+      <div class="hero-meta-item" role="listitem"><strong>Scope</strong>Platform selection, types and trade-offs</div>
+    </div>
+  </div>
+</header>
+
+<main id="main-content">
+<div class="page-wrap">
+
+<!-- SECTION 1: WHAT IS AN AGENT -->
+<section id="what" aria-labelledby="what-title">
+  <p class="section-label" aria-hidden="true">Section 01</p>
+  <h2 id="what-title" class="section-title">What actually is an AI agent?</h2>
+  <p class="section-intro">The term gets used loosely. Here are three grounding concepts that will help you make sense of everything else on this page.</p>
+
+  <div class="def-grid reveal" role="list" aria-label="Three grounding concepts">
+    <div class="def-card" role="listitem">
+      <p class="def-card-num">01</p>
+      <h3>A chatbot answers. An agent acts.</h3>
+      <p>A chatbot gives you a response. An AI agent takes a goal, works out the steps to achieve it, and executes those steps across multiple tools, systems, and decisions without you having to orchestrate every move.</p>
+      <span class="tag">The core distinction</span>
+    </div>
+    <div class="def-card" role="listitem">
+      <p class="def-card-num">02</p>
+      <h3>Agents need tools, memory, and goals.</h3>
+      <p>An agent is typically given a large language model as its reasoning engine, a set of tools it can call (search, APIs, calendar, code), some memory of what has happened so far, and an objective. The model decides when and how to use each tool.</p>
+      <span class="tag">What makes it work</span>
+    </div>
+    <div class="def-card" role="listitem">
+      <p class="def-card-num">03</p>
+      <h3>Autonomy sits on a spectrum.</h3>
+      <p>Some agents always ask you before acting. Others run fully in the background. The right level of autonomy depends on how much the cost of an error matters and how confident you are in what the agent has been trained to do.</p>
+      <span class="tag">Design principle</span>
+    </div>
+  </div>
+
+  <div class="callout" role="note">
+    <strong>A useful mental model:</strong> think of an agent as a very capable intern with access to your tools. You set the objective and the guardrails; the agent figures out the how. The difference between a good agent deployment and a bad one is usually how clearly the objective and constraints were defined, not the model or the platform.
+  </div>
+</section>
+
+<!-- SECTION 2: THREE TYPES -->
+<section id="types" aria-labelledby="types-title">
+  <p class="section-label" aria-hidden="true">Section 02</p>
+  <h2 id="types-title" class="section-title">Three types of agent</h2>
+  <p class="section-intro">Most agents in use today fall into one of three categories. Understanding the distinction helps you choose the right platform and set the right expectations.</p>
+
+  <div class="three-col">
+
+    <!-- USER-DRIVEN -->
+    <article class="agent-card type-user reveal" aria-labelledby="type-user-title">
+      <div class="agent-card-header">
+        <p class="agent-card-type">Type 01: User-driven</p>
+        <h3 id="type-user-title">Conversational and Copilot Agents</h3>
+        <p class="agent-card-desc">The user is in the loop at every step. You ask, it responds, fetches, summarises, or drafts and waits for your next prompt. Low autonomy, high transparency.</p>
+      </div>
+      <div class="agent-card-body">
+        <h4>Where to build</h4>
+        <ul class="t
+
+On Thu, Jun 4, 2026, 12:37 PM Taiwo Alawiye <alawiyetaiwo4@gmail.com> wrote:
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Building AI Agents: A Practical Field Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,300&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink: #0f0f0f;
+    --ink-mid: #3a3a3a;
+    --ink-light: #5a5a5a;
+    --ink-faint: #8a8a8a;
+    --bg: #ffffff;
+    --bg-warm: #fafaf8;
+    --bg-tint: #f4f4f0;
+    --rule: #e0ddd8;
+
+    /* Blue replaces the former orange accent throughout */
+    --accent: #1a4fc8;
+    --accent-soft: #e9eef5;
+
+    --blue: #1a4fc8;
+    --blue-soft: #e9eef5;
+    --green: #166534;
+    --green-soft: #dcfce7;
+    --amber: #92400e;
+    --amber-soft: #fef3c7;
+    --purple: #5b21b6;
+    --purple-soft: #ede9fe;
+
+    --type-display: 'Playfair Display', Georgia, serif;
+    --type-body: 'Source Serif 4', Georgia, serif;
+    --type-mono: 'IBM Plex Mono', 'Courier New', monospace;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--type-body);
+    font-size: 17px;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Skip link for keyboard users */
+  .skip-link {
+    position: absolute;
+    top: -999px;
+    left: 0;
+    background: var(--accent);
+    color: #fff;
+    padding: 0.5rem 1rem;
+    font-family: var(--type-mono);
+    font-size: 12px;
+    z-index: 9999;
+    text-decoration: none;
+    border-radius: 0 0 4px 0;
+  }
+  .skip-link:focus { top: 0; }
+
+  /* NAV */
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(255,255,255,0.97);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--rule);
+    padding: 0 2rem;
+  }
+  .nav-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+    gap: 1rem;
+  }
+  .nav-brand {
+    font-family: var(--type-mono);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ink-light);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    text-decoration: none;
+  }
+  .nav-brand:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+  .nav-links {
+    display: flex;
+    gap: 0;
+    list-style: none;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .nav-links::-webkit-scrollbar { display: none; }
+  .nav-links a {
+    display: block;
+    padding: 0 1rem;
+    height: 56px;
+    line-height: 56px;
+    font-family: var(--type-mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-light);
+    text-decoration: none;
+    white-space: nowrap;
+    transition: color 0.2s;
+    border-bottom: 2px solid transparent;
+  }
+  .nav-links a:hover,
+  .nav-links a:focus-visible {
+    color: var(--ink);
+    border-bottom-color: var(--accent);
+    outline: none;
+  }
+
+  /* HERO */
+  .hero {
+    background: var(--bg);
+    border-bottom: 1px solid var(--rule);
+    padding: 5rem 2rem 4rem;
+  }
+  .hero-inner {
+    max-width: 860px;
+    margin: 0 auto;
+  }
+  .hero-eyebrow {
+    font-family: var(--type-mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 1.25rem;
+  }
+  .hero h1 {
+    font-family: var(--type-display);
+    font-size: clamp(2.8rem, 6vw, 4.5rem);
+    font-weight: 900;
+    line-height: 1.08;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    margin-bottom: 1.5rem;
+  }
+  .hero h1 em {
+    font-style: italic;
+    color: var(--accent);
+  }
+  .hero-sub {
+    font-size: 1.15rem;
+    color: var(--ink-mid);
+    font-weight: 300;
+    max-width: 640px;
+    line-height: 1.6;
+    margin-bottom: 2.5rem;
+  }
+  .hero-meta {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+  .hero-meta-item {
+    font-family: var(--type-mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+  }
+  .hero-meta-item strong {
+    display: block;
+    color: var(--ink-mid);
+    font-weight: 500;
+    margin-bottom: 2px;
+  }
+
+  /* PAGE LAYOUT */
+  .page-wrap {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 2rem;
+  }
+
+  /* SECTION */
+  section {
+    padding: 4rem 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  section:last-child { border-bottom: none; }
+
+  .section-label {
+    font-family: var(--type-mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 0.5rem;
+  }
+  .section-title {
+    font-family: var(--type-display);
+    font-size: clamp(1.8rem, 3vw, 2.4rem);
+    font-weight: 700;
+    line-height: 1.15;
+    margin-bottom: 0.75rem;
+    color: var(--ink);
+  }
+  .section-intro {
+    font-size: 1.05rem;
+    color: var(--ink-mid);
+    font-weight: 300;
+    max-width: 680px;
+    margin-bottom: 2.5rem;
+    line-height: 1.65;
+  }
+
+  /* TWO COL */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+  }
+  @media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
+
+  .three-col {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;
+  }
+  @media (max-width: 900px) { .three-col { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 560px) { .three-col { grid-template-columns: 1fr; } }
+
+  /* DEFINITION CARDS */
+  .def-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--rule);
+    border: 1px solid var(--rule);
+    margin-bottom: 2rem;
+  }
+  @media (max-width: 700px) { .def-grid { grid-template-columns: 1fr; } }
+  .def-card {
+    background: var(--bg);
+    padding: 1.75rem;
+  }
+  .def-card-num {
+    font-family: var(--type-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--ink-faint);
+    margin-bottom: 0.75rem;
+  }
+  .def-card h3 {
+    font-family: var(--type-display);
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    line-height: 1.2;
+  }
+  .def-card p {
+    font-size: 0.95rem;
+    color: var(--ink-mid);
+    line-height: 1.6;
+  }
+  .def-card .tag {
+    display: inline-block;
+    margin-top: 1rem;
+    font-family: var(--type-mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 2px;
+    background: var(--bg-tint);
+    color: var(--ink-light);
+  }
+
+  /* AGENT TYPE CARDS */
+  .agent-card {
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    overflow: hidden;
+    background: var(--bg);
+    transition: box-shadow 0.2s;
+  }
+  .agent-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+  .agent-card-header {
+    padding: 1.5rem 1.75rem 1.25rem;
+    border-bottom: 1px solid var(--rule);
+  }
+  .agent-card-type {
+    font-family: var(--type-mono);
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+  .agent-card h3 {
+    font-family: var(--type-display);
+    font-size: 1.4rem;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 0.5rem;
+  }
+  .agent-card-desc {
+    font-size: 0.92rem;
+    color: var(--ink-mid);
+    line-height: 1.6;
+  }
+  .agent-card-body {
+    padding: 1.5rem 1.75rem;
+  }
+  .agent-card-body h4 {
+    font-family: var(--type-mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 0.75rem;
+  }
+  .tools-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin-bottom: 1.25rem;
+  }
+  .tools-list li {
+    font-size: 0.9rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    line-height: 1.4;
+    color: var(--ink-mid);
+  }
+  .tools-list li::before {
+    content: '\2192';
+    color: var(--ink-faint);
+    flex-shrink: 0;
+    font-family: var(--type-mono);
+    font-size: 0.8rem;
+    margin-top: 1px;
+  }
+  .use-cases {
+    background: var(--bg-tint);
+    border-radius: 3px;
+    padding: 1rem 1.25rem;
+  }
+  .use-cases h4 {
+    margin-bottom: 0.5rem;
+  }
+  .use-cases p {
+    font-size: 0.9rem;
+    color: var(--ink-mid);
+    line-height: 1.5;
+  }
+
+  /* COLOUR ACCENTS PER TYPE */
+  .type-user .agent-card-type { color: var(--blue); }
+  .type-user .agent-card-header {
+    border-left: 3px solid var(--blue);
+    padding-left: calc(1.75rem - 3px);
+  }
+  .type-workflow .agent-card-type { color: var(--green); }
+  .type-workflow .agent-card-header {
+    border-left: 3px solid var(--green);
+    padding-left: calc(1.75rem - 3px);
+  }
+  .type-autonomous .agent-card-type { color: var(--purple); }
+  .type-autonomous .agent-card-header {
+    border-left: 3px solid var(--purple);
+    padding-left: calc(1.75rem - 3px);
+  }
+
+  /* COMPARISON TABLE */
+  .comparison-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+  }
+  .comparison-table th {
+    font-family: var(--type-mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-light);
+    text-align: left;
+    padding: 0.75rem 1rem;
+    border-bottom: 2px solid var(--ink);
+    white-space: nowrap;
+  }
+  .comparison-table td {
+    padding: 0.9rem 1rem;
+    border-bottom: 1px solid var(--rule);
+    vertical-align: top;
+    line-height: 1.45;
+    color: var(--ink-mid);
+  }
+  .comparison-table td:first-child {
+    font-weight: 600;
+    color: var(--ink);
+    white-space: nowrap;
+  }
+  .comparison-table tr:hover td { background: var(--bg-warm); }
+  .table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+  }
+  .badge {
+    display: inline-block;
+    font-family: var(--type-mono);
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 2px 7px;
+    border-radius: 2px;
+    font-weight: 500;
+  }
+  .badge-low { background: var(--green-soft); color: var(--green); }
+  .badge-med { background: var(--amber-soft); color: var(--amber); }
+  .badge-high { background: var(--accent-soft); color: var(--accent); }
+  .badge-var { background: var(--bg-tint); color: var(--ink-light); }
+
+  /* DECISION GUIDE */
+  .decision-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+  }
+  @media (max-width: 700px) { .decision-grid { grid-template-columns: 1fr; } }
+  .decision-card {
+    background: var(--bg-warm);
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    padding: 1.5rem;
+  }
+  .decision-q {
+    font-family: var(--type-display);
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    line-height: 1.35;
+    color: var(--ink);
+  }
+  .decision-a {
+    font-size: 0.9rem;
+    color: var(--ink-mid);
+    line-height: 1.6;
+  }
+  .decision-a strong { color: var(--ink); }
+
+  /* COST SECTION */
+  .cost-row {
+    display: grid;
+    grid-template-columns: 200px 1fr auto;
+    gap: 1rem;
+    align-items: baseline;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--rule);
+    font-size: 0.92rem;
+  }
+  .cost-row:last-child { border-bottom: none; }
+  .cost-platform { font-weight: 600; color: var(--ink); }
+  .cost-detail { color: var(--ink-mid); line-height: 1.5; }
+  @media (max-width: 700px) {
+    .cost-row { grid-template-columns: 1fr; gap: 0.4rem; }
+  }
+
+  /* PLATFORM DETAIL CARDS */
+  .api-card {
+    background: var(--bg-tint);
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    padding: 1.5rem 1.75rem;
+    margin-bottom: 1rem;
+  }
+  .api-card h3 {
+    font-family: var(--type-display);
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: var(--ink);
+  }
+  .api-card p {
+    font-size: 0.92rem;
+    color: var(--ink-mid);
+    line-height: 1.6;
+    margin-bottom: 0.75rem;
+  }
+  .code-inline {
+    font-family: var(--type-mono);
+    font-size: 0.82rem;
+    background: #e8e5e0;
+    padding: 2px 6px;
+    border-radius: 2px;
+    color: var(--ink-mid);
+  }
+  .pros-cons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-top: 0.75rem;
+  }
+  @media (max-width: 560px) { .pros-cons { grid-template-columns: 1fr; } }
+  .pros, .cons {
+    font-size: 0.88rem;
+    line-height: 1.55;
+  }
+  .pros strong { color: var(--green); display: block; margin-bottom: 0.3rem; }
+  .cons strong { color: var(--amber); display: block; margin-bottom: 0.3rem; }
+  .pros ul, .cons ul {
+    list-style: none;
+    color: var(--ink-mid);
+  }
+  .pros ul li { padding-left: 1.2em; position: relative; }
+  .pros ul li::before {
+    content: '\2713';
+    color: var(--green);
+    position: absolute;
+    left: 0;
+  }
+  .cons ul li { padding-left: 1.2em; position: relative; }
+  .cons ul li::before {
+    content: '\2715';
+    color: var(--amber);
+    position: absolute;
+    left: 0;
+  }
+
+  /* CHECKLIST */
+  .checklist {
+    list-style: none;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+  }
+  @media (max-width: 600px) { .checklist { grid-template-columns: 1fr; } }
+  .checklist li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    font-size: 0.92rem;
+    line-height: 1.5;
+  }
+  .check-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    min-width: 22px;
+    border: 1.5px solid var(--rule);
+    border-radius: 3px;
+    flex-shrink: 0;
+    margin-top: 2px;
+    font-family: var(--type-mono);
+    font-size: 11px;
+    color: var(--ink-faint);
+  }
+  .checklist li .checklist-text strong {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 2px;
+    color: var(--ink);
+  }
+  .checklist li .checklist-text span {
+    display: block;
+    color: var(--ink-mid);
+    font-size: 0.85rem;
+  }
+
+  /* CALLOUT */
+  .callout {
+    border-left: 3px solid var(--accent);
+    padding: 1.25rem 1.5rem;
+    background: var(--accent-soft);
+    border-radius: 0 4px 4px 0;
+    margin: 2rem 0;
+    font-size: 0.92rem;
+    line-height: 1.65;
+    color: var(--ink-mid);
+  }
+  .callout strong { color: var(--ink); }
+
+  /* FOOTER */
+  footer {
+    background: var(--ink);
+    color: rgba(255,255,255,0.6);
+    padding: 2.5rem;
+    font-family: var(--type-mono);
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-align: center;
+    line-height: 1.8;
+  }
+  footer strong { color: rgba(255,255,255,0.85); }
+
+  /* SCROLL REVEAL */
+  .reveal {
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* FOCUS STYLES */
+  a:focus-visible,
+  button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  /* SCROLL OFFSET: compensates for sticky nav so anchor links land correctly */
+  section[id], header[id] {
+    scroll-margin-top: 64px;
+  }
+
+  /* PRINT */
+  @media print {
+    nav { display: none; }
+    .hero { padding: 2rem 0; }
+    section { page-break-inside: avoid; }
+    .reveal { opacity: 1; transform: none; }
+  }
+</style>
+</head>
+<body>
+
+<a href="#main-content" class="skip-link">Skip to main content</a>
+
+<!-- NAV -->
+<nav role="navigation" aria-label="Page sections">
+  <div class="nav-inner">
+    <a href="#top" class="nav-brand">AI Agents: Field Guide</a>
+    <ul class="nav-links" role="list">
+      <li><a href="#what">What is an agent?</a></li>
+      <li><a href="#types">Three types</a></li>
+      <li><a href="#platforms">Where to build</a></li>
+      <li><a href="#compare">Compare</a></li>
+      <li><a href="#costs">Costs</a></li>
+      <li><a href="#api">API approach</a></li>
+      <li><a href="#decide">Decision guide</a></li>
+      <li><a href="#checklist">Checklist</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- HERO -->
+<header id="top" class="hero">
+  <div class="hero-inner">
+    <p class="hero-eyebrow">AI and Product Transformation: Workshop Reference</p>
+    <h1>Building <em>AI Agents</em><br>A Practical Field Guide</h1>
+    <p class="hero-sub">Where to build, what to build, and what to think about before you start. Covering no-code builders through to developer frameworks and autonomous multi-agent systems.</p>
+    <div class="hero-meta" role="list" aria-label="Document metadata">
+      <div class="hero-meta-item" role="listitem"><strong>Audience</strong>Product, tech and business teams</div>
+      <div class="hero-meta-item" role="listitem"><strong>Level</strong>Introductory to intermediate</div>
+      <div class="hero-meta-item" role="listitem"><strong>Scope</strong>Platform selection, types and trade-offs</div>
+    </div>
+  </div>
+</header>
+
+<main id="main-content">
+<div class="page-wrap">
+
+<!-- SECTION 1: WHAT IS AN AGENT -->
+<section id="what" aria-labelledby="what-title">
+  <p class="section-label" aria-hidden="true">Section 01</p>
+  <h2 id="what-title" class="section-title">What actually is an AI agent?</h2>
+  <p class="section-intro">The term gets used loosely. Here are three grounding concepts that will help you make sense of everything else on this page.</p>
+
+  <div class="def-grid reveal" role="list" aria-label="Three grounding concepts">
+    <div class="def-card" role="listitem">
+      <p class="def-card-num">01</p>
+      <h3>A chatbot answers. An agent acts.</h3>
+      <p>A chatbot gives you a response. An AI agent takes a goal, works out the steps to achieve it, and executes those steps across multiple tools, systems, and decisions without you having to orchestrate every move.</p>
+      <span class="tag">The core distinction</span>
+    </div>
+    <div class="def-card" role="listitem">
+      <p class="def-card-num">02</p>
+      <h3>Agents need tools, memory, and goals.</h3>
+      <p>An agent is typically given a large language model as its reasoning engine, a set of tools it can call (search, APIs, calendar, code), some memory of what has happened so far, and an objective. The model decides when and how to use each tool.</p>
+      <span class="tag">What makes it work</span>
+    </div>
+    <div class="def-card" role="listitem">
+      <p class="def-card-num">03</p>
+      <h3>Autonomy sits on a spectrum.</h3>
+      <p>Some agents always ask you before acting. Others run fully in the background. The right level of autonomy depends on how much the cost of an error matters and how confident you are in what the agent has been trained to do.</p>
+      <span class="tag">Design principle</span>
+    </div>
+  </div>
+
+  <div class="callout" role="note">
+    <strong>A useful mental model:</strong> think of an agent as a very capable intern with access to your tools. You set the objective and the guardrails; the agent figures out the how. The difference between a good agent deployment and a bad one is usually how clearly the objective and constraints were defined, not the model or the platform.
+  </div>
+</section>
+
+<!-- SECTION 2: THREE TYPES -->
+<section id="types" aria-labelledby="types-title">
+  <p class="section-label" aria-hidden="true">Section 02</p>
+  <h2 id="types-title" class="section-title">Three types of agent</h2>
+  <p class="section-intro">Most agents in use today fall into one of three categories. Understanding the distinction helps you choose the right platform and set the right expectations.</p>
+
+  <div class="three-col">
+
+    <!-- USER-DRIVEN -->
+    <article class="agent-card type-user reveal" aria-labelledby="type-user-title">
+      <div class="agent-card-header">
+        <p class="agent-card-type">Type 01: User-driven</p>
+        <h3 id="type-user-title">Conversational and Copilot Agents</h3>
+        <p class="agent-card-desc">The user is in the loop at every step. You ask, it responds, fetches, summarises, or drafts and waits for your next prompt. Low
+
+On Thu, Jun 4, 2026, 12:21 PM Taiwo Alawiye <alawiyetaiwo4@gmail.com> wrote:
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Building AI Agents: A Practical Field Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,300&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink: #0f0f0f;
+    --ink-mid: #3a3a3a;
+    --ink-light: #5a5a5a;
+    --ink-faint: #8a8a8a;
+    --bg: #ffffff;
+    --bg-warm: #fafaf8;
+    --bg-tint: #f4f4f0;
+    --rule: #e0ddd8;
+
+    /* Blue replaces the former orange accent throughout */
+    --accent: #1a4fc8;
+    --accent-soft: #e9eef5;
+
+    --blue: #1a4fc8;
+    --blue-soft: #e9eef5;
+    --green: #166534;
+    --green-soft: #dcfce7;
+    --amber: #92400e;
+    --amber-soft: #fef3c7;
+    --purple: #5b21b6;
+    --purple-soft: #ede9fe;
+
+    --type-display: 'Playfair Display', Georgia, serif;
+    --type-body: 'Source Serif 4', Georgia, serif;
+    --type-mono: 'IBM Plex Mono', 'Courier New', monospace;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--type-body);
+    font-size: 17px;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Skip link for keyboard users */
+  .skip-link {
+    position: absolute;
+    top: -999px;
+    left: 0;
+    background: var(--accent);
+    color: #fff;
+    padding: 0.5rem 1rem;
+    font-family: var(--type-mono);
+    font-size: 12px;
+    z-index: 9999;
+    text-decoration: none;
+    border-radius: 0 0 4px 0;
+  }
+  .skip-link:focus { top: 0; }
+
+  /* NAV */
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(255,255,255,0.97);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--rule);
+    padding: 0 2rem;
+  }
+  .nav-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+    gap: 1rem;
+  }
+  .nav-brand {
+    font-family: var(--type-mono);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ink-light);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    text-decoration: none;
+  }
+  .nav-brand:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+  .nav-links {
+    display: flex;
+    gap: 0;
+    list-style: none;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .nav-links::-webkit-scrollbar { display: none; }
+  .nav-links a {
+    display: block;
+    padding: 0 1rem;
+    height: 56px;
+    line-height: 56px;
+    font-family: var(--type-mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-light);
+    text-decoration: none;
+    white-space: nowrap;
+    transition: color 0.2s;
+    border-bottom: 2px solid transparent;
+  }
+  .nav-links a:hover,
+  .nav-links a:focus-visible {
+    color: var(--ink);
+    border-bottom-color: var(--accent);
+    outline: none;
+  }
+
+  /* HERO */
+  .hero {
+    background: var(--bg);
+    border-bottom: 1px solid var(--rule);
+    padding: 5rem 2rem 4rem;
+  }
+  .hero-inner {
+    max-width: 860px;
+    margin: 0 auto;
+  }
+  .hero-eyebrow {
+    font-family: var(--type-mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 1.25rem;
+  }
+  .hero h1 {
+    font-family: var(--type-display);
+    font-size: clamp(2.8rem, 6vw, 4.5rem);
+    font-weight: 900;
+    line-height: 1.08;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    margin-bottom: 1.5rem;
+  }
+  .hero h1 em {
+    font-style: italic;
+    color: var(--accent);
+  }
+  .hero-sub {
+    font-size: 1.15rem;
+    color: var(--ink-mid);
+    font-weight: 300;
+    max-width: 640px;
+    line-height: 1.6;
+    margin-bottom: 2.5rem;
+  }
+  .hero-meta {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+  .hero-meta-item {
+    font-family: var(--type-mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+  }
+  .hero-meta-item strong {
+    display: block;
+    color: var(--ink-mid);
+    font-weight: 500;
+    margin-bottom: 2px;
+  }
+
+  /* PAGE LAYOUT */
+  .page-wrap {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 2rem;
+  }
+
+  /* SECTION */
+  section {
+    padding: 4rem 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  section:last-child { border-bottom: none; }
+
+  .section-label {
+    font-family: var(--type-mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 0.5rem;
+  }
+  .section-title {
+    font-family: var(--type-display);
+    font-size: clamp(1.8rem, 3vw, 2.4rem);
+    font-weight: 700;
+    line-height: 1.15;
+    margin-bottom: 0.75rem;
+    color: var(--ink);
+  }
+  .section-intro {
+    font-size: 1.05rem;
+    color: var(--ink-mid);
+    font-weight: 300;
+    max-width: 680px;
+    margin-bottom: 2.5rem;
+    line-height: 1.65;
+  }
+
+  /* TWO COL */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+  }
+  @media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
+
+  .three-col {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;
+  }
+  @media (max-width: 900px) { .three-col { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 560px) { .three-col { grid-template-columns: 1fr; } }
+
+  /* DEFINITION CARDS */
+  .def-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--rule);
+    border: 1px solid var(--rule);
+    margin-bottom: 2rem;
+  }
+  @media (max-width: 700px) { .def-grid { grid-template-columns: 1fr; } }
+  .def-card {
+    background: var(--bg);
+    padding: 1.75rem;
+  }
+  .def-card-num {
+    font-family: var(--type-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--ink-faint);
+    margin-bottom: 0.75rem;
+  }
+  .def-card h3 {
+    font-family: var(--type-display);
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    line-height: 1.2;
+  }
+  .def-card p {
+    font-size: 0.95rem;
+    color: var(--ink-mid);
+    line-height: 1.6;
+  }
+  .def-card .tag {
+    display: inline-block;
+    margin-top: 1rem;
+    font-family: var(--type-mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 2px;
+    background: var(--bg-tint);
+    color: var(--ink-light);
+  }
+
+  /* AGENT TYPE CARDS */
+  .agent-card {
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    overflow: hidden;
+    background: var(--bg);
+    transition: box-shadow 0.2s;
+  }
+  .agent-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+  .agent-card-header {
+    padding: 1.5rem 1.75rem 1.25rem;
+    border-bottom: 1px solid var(--rule);
+  }
+  .agent-card-type {
+    font-family: var(--type-mono);
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+  .agent-card h3 {
+    font-family: var(--type-display);
+    font-size: 1.4rem;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 0.5rem;
+  }
+  .agent-card-desc {
+    font-size: 0.92rem;
+    color: var(--ink-mid);
+    line-height: 1.6;
+  }
+  .agent-card-body {
+    padding: 1.5rem 1.75rem;
+  }
+  .agent-card-body h4 {
+    font-family: var(--type-mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 0.75rem;
+  }
+  .tools-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin-bottom: 1.25rem;
+  }
+  .tools-list li {
+    font-size: 0.9rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    line-height: 1.4;
+    color: var(--ink-mid);
+  }
+  .tools-list li::before {
+    content: '\2192';
+    color: var(--ink-faint);
+    flex-shrink: 0;
+    font-family: var(--type-mono);
+    font-size: 0.8rem;
+    margin-top: 1px;
+  }
+  .use-cases {
+    background: var(--bg-tint);
+    border-radius: 3px;
+    padding: 1rem 1.25rem;
+  }
+  .use-cases h4 {
+    margin-bottom: 0.5rem;
+  }
+  .use-cases p {
+    font-size: 0.9rem;
+    color: var(--ink-mid);
+    line-height: 1.5;
+  }
+
+  /* COLOUR ACCENTS PER TYPE */
+  .type-user .agent-card-type { color: var(--blue); }
+  .type-user .agent-card-header {
+    border-left: 3px solid var(--blue);
+    padding-left: calc(1.75rem - 3px);
+  }
+  .type-workflow .agent-card-type { color: var(--green); }
+  .type-workflow .agent-card-header {
+    border-left: 3px solid var(--green);
+    padding-left: calc(1.75rem - 3px);
+  }
+  .type-autonomous .agent-card-type { color: var(--purple); }
+  .type-autonomous .agent-card-header {
+    border-left: 3px solid var(--purple);
+    padding-left: calc(1.75rem - 3px);
+  }
+
+  /* COMPARISON TABLE */
+  .comparison-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+  }
+  .comparison-table th {
+    font-family: var(--type-mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-light);
+    text-align: left;
+    padding: 0.75rem 1rem;
+    border-bottom: 2px solid var(--ink);
+    white-space: nowrap;
+  }
+  .comparison-table td {
+    padding: 0.9rem 1rem;
+    border-bottom: 1px solid var(--rule);
+    vertical-align: top;
+    line-height: 1.45;
+    color: var(--ink-mid);
+  }
+  .comparison-table td:first-child {
+    font-weight: 600;
+    color: var(--ink);
+    white-space: nowrap;
+  }
+  .comparison-table tr:hover td { background: var(--bg-warm); }
+  .table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+  }
+  .badge {
+    display: inline-block;
+    font-family: var(--type-mono);
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 2px 7px;
+    border-radius: 2px;
+    font-weight: 500;
+  }
+  .badge-low { background: var(--green-soft); color: var(--green); }
+  .badge-med { background: var(--amber-soft); color: var(--amber); }
+  .badge-high { background: var(--accent-soft); color: var(--accent); }
+  .badge-var { background: var(--bg-tint); color: var(--ink-light); }
+
+  /* DECISION GUIDE */
+  .decision-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+  }
+  @media (max-width: 700px) { .decision-grid { grid-template-columns: 1fr; } }
+  .decision-card {
+    background: var(--bg-warm);
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    padding: 1.5rem;
+  }
+  .decision-q {
+    font-family: var(--type-display);
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    line-height: 1.35;
+    color: var(--ink);
+  }
+  .decision-a {
+    font-size: 0.9rem;
+    color: var(--ink-mid);
+    line-height: 1.6;
+  }
+  .decision-a strong { color: var(--ink); }
+
+  /* COST SECTION */
+  .cost-row {
+    display: grid;
+    grid-template-columns: 200px 1fr auto;
+    gap: 1rem;
+    align-items: baseline;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--rule);
+    font-size: 0.92rem;
+  }
+  .cost-row:last-child { border-bottom: none; }
+  .cost-platform { font-weight: 600; color: var(--ink); }
+  .cost-detail { color: var(--ink-mid); line-height: 1.5; }
+  @media (max-width: 700px) {
+    .cost-row { grid-template-columns: 1fr; gap: 0.4rem; }
+  }
+
+  /* PLATFORM DETAIL CARDS */
+  .api-card {
+    background: var(--bg-tint);
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    padding: 1.5rem 1.75rem;
+    margin-bottom: 1rem;
+  }
+  .api-card h3 {
+    font-family: var(--type-display);
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: var(--ink);
+  }
+  .api-card p {
+    font-size: 0.92rem;
+    color: var(--ink-mid);
+    line-height: 1.6;
+    margin-bottom: 0.75rem;
+  }
+  .code-inline {
+    font-family: var(--type-mono);
+    font-size: 0.82rem;
+    background: #e8e5e0;
+    padding: 2px 6px;
+    border-radius: 2px;
+    color: var(--ink-mid);
+  }
+  .pros-cons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-top: 0.75rem;
+  }
+  @media (max-width: 560px) { .pros-cons { grid-template-columns: 1fr; } }
+  .pros, .cons {
+    font-size: 0.88rem;
+    line-height: 1.55;
+  }
+  .pros strong { color: var(--green); display: block; margin-bottom: 0.3rem; }
+  .cons strong { color: var(--amber); display: block; margin-bottom: 0.3rem; }
+  .pros ul, .cons ul {
+    list-style: none;
+    color: var(--ink-mid);
+  }
+  .pros ul li { padding-left: 1.2em; position: relative; }
+  .pros ul li::before {
+    content: '\2713';
+    color: var(--green);
+    position: absolute;
+    left: 0;
+  }
+  .cons ul li { padding-left: 1.2em; position: relative; }
+  .cons ul li::before {
+    content: '\2715';
+    color: var(--amber);
+    position: absolute;
+    left: 0;
+  }
+
+  /* CHECKLIST */
+  .checklist {
+    list-style: none;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+  }
+  @media (max-width: 600px) { .checklist { grid-template-columns: 1fr; } }
+  .checklist li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    font-size: 0.92rem;
+    line-height: 1.5;
+  }
+  .check-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    min-width: 22px;
+    border: 1.5px solid var(--rule);
+    border-radius: 3px;
+    flex-shrink: 0;
+    margin-top: 2px;
+    font-family: var(--type-mono);
+    font-size: 11px;
+    color: var(--ink-faint);
+  }
+  .checklist li .checklist-text strong {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 2px;
+    color: var(--ink);
+  }
+  .checklist li .checklist-text span {
+    display: block;
+    color: var(--ink-mid);
+    font-size: 0.85rem;
+  }
+
+  /* CALLOUT */
+  .callout {
+    border-left: 3px solid var(--accent);
+    padding: 1.25rem 1.5rem;
+    background: var(--accent-soft);
+    border-radius: 0 4px 4px 0;
+    margin: 2rem 0;
+    font-size: 0.92rem;
+    line-height: 1.65;
+    color: var(--ink-mid);
+  }
+  .callout strong { color: var(--ink); }
+
+  /* FOOTER */
+  footer {
+    background: var(--ink);
+    color: rgba(255,255,255,0.6);
+    padding: 2.5rem;
+    font-family: var(--type-mono);
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-align: center;
+    line-height: 1.8;
+  }
+  footer strong { color: rgba(255,255,255,0.85); }
+
+  /* SCROLL REVEAL */
+  .reveal {
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* FOCUS STYLES */
+  a:focus-visible,
+  button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  /* SCROLL OFFSET: compensates for sticky nav so anchor links land correctly */
+  section[id], header[id] {
+    scroll-margin-top: 64px;
+  }
+
+  /* PRINT */
+  @media print {
+    nav { display: none; }
+    .hero { padding: 2rem 0; }
+    section { page-break-inside: avoid; }
+    .reveal { opacity: 1; transform: none; }
+  }
+</style>
+</head>
+<body>
+
+<a href="#main-content" class="skip-link">Skip to main content</a>
+
+<!-- NAV -->
+<nav role="navigation" aria-label="Page sections">
+  <div class="nav-inner">
+    <a href="#top" class="nav-brand">AI Agents: Field Guide</a>
+    <ul class="nav-links" role="list">
+      <li><a href="#what">What is an agent?</a></li>
+      <li><a href="#types">Three types</a></li>
+      <li><a href="#platforms">Where to build</a></li>
+      <li><a href="#compare">Compare</a></li>
+      <li><a href="#costs">Costs</a></li>
+      <li><a href="#api">API approach</a></li>
+      <li><a href="#decide">Decision guide</a></li>
+      <li><a href="#checklist">Checklist</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- HERO -->
+<header id="top" class="hero">
+  <div class="hero-inner">
+    <p class="hero-eyebrow">AI and Product Transformation: Workshop Reference</p>
+    <h1>Building <em>AI Agents</em><br>A Practical Field Guide</h1>
+    <p class="hero-sub">Where to build, what to build, and what to think about before you start. Covering no-code builders through to developer frameworks and autonomous multi-agent systems.</p>
+    <div class="hero-meta" role="list" aria-label="Document metadata">
+      <div class="hero-meta-item" role="listitem"><strong>Audience</strong>Product, tech and business teams</div>
+      <div class="hero-meta-item" role="listitem"><strong>Level</strong>Introductory to intermediate</div>
+      <div class="hero-meta-item" role="listitem"><strong>Scope</strong>Platform selection, types and trade-offs</div>
+    </div>
+  </div>
+</header>
+
+<main id="main-content">
+<div class="page-wrap">
+
+<!-- SECTION 1: WHAT IS AN AGENT -->
+<section id="what" aria-labelledby="what-title">
+  <p class="section-label" aria-hidden="true">Section 01</p>
+  <h2 id="what-title" class="section-title">What actually is an AI agent?</h2>
+  <p class="section-intro">The term gets used loosely. Here are three grounding concepts that will help you make sense of everything else on this page.</p>
+
+  <div class="def-grid reveal" role="list" aria-label="Three grounding concepts">
+    <div class="def-card" role="listitem">
+      <p class="def-card-num">01</p>
+      <h3>A chatbot answers. An agent acts.</h3>
+      <p>A chatbot gives you a response. An AI agent takes a goal, works out the steps to achieve it, and executes those steps across multiple tools, systems, and decisions without you having to orchestrate every move.</p>
+      <span class="tag">The core distinction</span>
+    </div>
+    <div class="def-card" role="listitem">
+      <p class="def-card-num">02</p>
+      <h3>Agents need tools, memory, and goals.</h3>
+      <p>An agent is typically given a large language model as its reasoning engine, a set of tools it can call (search, APIs, calendar, code), some memory of what has happened so far, and an objective. The model decides when and how to use each tool.</p>
+      <span class="tag">What makes it work</span>
+    </div>
+    <div class="def-card" role="listitem">
+      <p class="def-card-num">03</p>
+      <h3>Autonomy sits on a spectrum.</h3>
+      <p>Some agents always ask you before acting. Others run fully in the background. The right level of autonomy depends on how much the cost of an error matters and how confident you are in what the agent has been trained to do.</p>
+      <span class="tag">Design principle</span>
+    </div>
+  </div>
+
+  <div class="callout" role="note">
+    <strong>A useful mental model:</strong> think of an agent as a very capable intern with access to your tools. You set the objective and the guardrails; the agent figures out the how. The difference between a good agent deployment and a bad one is usually how clearly the objective and constraints were defined, not the model or the platform.
+  </div>
+</section>
+
+<!-- SECTION 2: THREE TYPES -->
+<section id="types" aria-labelledby="types-title">
+  <p class="section-label" aria-hidden="true">Section 02</p>
+  <h2 id="types-title" class="section-title">Three types of agent</h2>
+  <p class="section-intro">Most agents in use today fall into one of three categories. Understanding the distinction helps you choose the right platform and set the right expectations.</p>
+
+  <div class="three-col">
+
+    <!-- USER-DRIVEN -->
+    <article class="agent-card type-user reveal" aria-labelledby="type-user-title">
+      <div class="agent-card-header">
+        <p class="agent-card-type">Type 01: User-driven</p>
+        <h3 id="type-user-title">Conversational and Copilot Agents</h3>
+        <p class="agent-card-desc">The user is in the loop at every step. You ask, it responds, fetches, summarises, or drafts and waits for your next prompt. Low
+
+On Thu, Jun 4, 2026, 11:09 AM Taiwo Alawiye <alawiyetaiwo4@gmail.com> wrote:
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Building AI Agents: A Practical Field Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,300&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink: #0f0f0f;
+    --ink-mid: #3a3a3a;
+    --ink-light: #5a5a5a;
+    --ink-faint: #8a8a8a;
+    --bg: #ffffff;
+    --bg-warm: #fafaf8;
+    --bg-tint: #f4f4f0;
+    --rule: #e0ddd8;
+
+    /* Blue replaces the former orange accent throughout */
+    --accent: #1a4fc8;
+    --accent-soft: #e9eef5;
+
+    --blue: #1a4fc8;
+    --blue-soft: #e9eef5;
+    --green: #166534;
+    --green-soft: #dcfce7;
+    --amber: #92400e;
+    --amber-soft: #fef3c7;
+    --purple: #5b21b6;
+    --purple-soft: #ede9fe;
+
+    --type-display: 'Playfair Display', Georgia, serif;
+    --type-body: 'Source Serif 4', Georgia, serif;
+    --type-mono: 'IBM Plex Mono', 'Courier New', monospace;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--type-body);
+    font-size: 17px;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Skip link for keyboard users */
+  .skip-link {
+    position: absolute;
+    top: -999px;
+    left: 0;
+    background: var(--accent);
+    color: #fff;
+    padding: 0.5rem 1rem;
+    font-family: var(--type-mono);
+    font-size: 12px;
+    z-index: 9999;
+    text-decoration: none;
+    border-radius: 0 0 4px 0;
+  }
+  .skip-link:focus { top: 0; }
+
+  /* NAV */
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(255,255,255,0.97);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--rule);
+    padding: 0 2rem;
+  }
+  .nav-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+    gap: 1rem;
+  }
+  .nav-brand {
+    font-family: var(--type-mono);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ink-light);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    text-decoration: none;
+  }
+  .nav-brand:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+  .nav-links {
+    display: flex;
+    gap: 0;
+    list-style: none;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .nav-links::-webkit-scrollbar { display: none; }
+  .nav-links a {
+    display: block;
+    padding: 0 1rem;
+    height: 56px;
+    line-height: 56px;
+    font-family: var(--type-mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-light);
+    text-decoration: none;
+    white-space: nowrap;
+    transition: color 0.2s;
+    border-bottom: 2px solid transparent;
+  }
+  .nav-links a:hover,
+  .nav-links a:focus-visible {
+    color: var(--ink);
+    border-bottom-color: var(--accent);
+    outline: none;
+  }
+
+  /* HERO */
+  .hero {
+    background: var(--bg);
+    border-bottom: 1px solid var(--rule);
+    padding: 5rem 2rem 4rem;
+  }
+  .hero-inner {
+    max-width: 860px;
+    margin: 0 auto;
+  }
+  .hero-eyebrow {
+    font-family: var(--type-mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 1.25rem;
+  }
+  .hero h1 {
+    font-family: var(--type-display);
+    font-size: clamp(2.8rem, 6vw, 4.5rem);
+    font-weight: 900;
+    line-height: 1.08;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    margin-bottom: 1.5rem;
+  }
+  .hero h1 em {
+    font-style: italic;
+    color: var(--accent);
+  }
+  .hero-sub {
+    font-size: 1.15rem;
+    color: var(--ink-mid);
+    font-weight: 300;
+    max-width: 640px;
+    line-height: 1.6;
+    margin-bottom: 2.5rem;
+  }
+  .hero-meta {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+  .hero-meta-item {
+    font-family: var(--type-mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+  }
+  .hero-meta-item strong {
+    display: block;
+    color: var(--ink-mid);
+    font-weight: 500;
+    margin-bottom: 2px;
+  }
+
+  /* PAGE LAYOUT */
+  .page-wrap {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 2rem;
+  }
+
+  /* SECTION */
+  section {
+    padding: 4rem 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  section:last-child { border-bottom: none; }
+
+  .section-label {
+    font-family: var(--type-mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 0.5rem;
+  }
+  .section-title {
+    font-family: var(--type-display);
+    font-size: clamp(1.8rem, 3vw, 2.4rem);
+    font-weight: 700;
+    line-height: 1.15;
+    margin-bottom: 0.75rem;
+    color: var(--ink);
+  }
+  .section-intro {
+    font-size: 1.05rem;
+    color: var(--ink-mid);
+    font-weight: 300;
+    max-width: 680px;
+    margin-bottom: 2.5rem;
+    line-height: 1.65;
+  }
+
+  /* TWO COL */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+  }
+  @media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
+
+  .three-col {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;
+  }
+  @media (max-width: 900px) { .three-col { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 560px) { .three-col { grid-template-columns: 1fr; } }
+
+  /* DEFINITION CARDS */
+  .def-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--rule);
+    border: 1px solid var(--rule);
+    margin-bottom: 2rem;
+  }
+  @media (max-width: 700px) { .def-grid { grid-template-columns: 1fr; } }
+  .def-card {
+    background: var(--bg);
+    padding: 1.75rem;
+  }
+  .def-card-num {
+    font-family: var(--type-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--ink-faint);
+    margin-bottom: 0.75rem;
+  }
+  .def-card h3 {
+    font-family: var(--type-display);
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    line-height: 1.2;
+  }
+  .def-card p {
+    font-size: 0.95rem;
+    color: var(--ink-mid);
+    line-height: 1.6;
+  }
+  .def-card .tag {
+    display: inline-block;
+    margin-top: 1rem;
+    font-family: var(--type-mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 2px;
+    background: var(--bg-tint);
+    color: var(--ink-light);
+  }
+
+  /* AGENT TYPE CARDS */
+  .agent-card {
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    overflow: hidden;
+    background: var(--bg);
+    transition: box-shadow 0.2s;
+  }
+  .agent-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+  .agent-card-header {
+    padding: 1.5rem 1.75rem 1.25rem;
+    border-bottom: 1px solid var(--rule);
+  }
+  .agent-card-type {
+    font-family: var(--type-mono);
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+  .agent-card h3 {
+    font-family: var(--type-display);
+    font-size: 1.4rem;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 0.5rem;
+  }
+  .agent-card-desc {
+    font-size: 0.92rem;
+    color: var(--ink-mid);
+    line-height: 1.6;
+  }
+  .agent-card-body {
+    padding: 1.5rem 1.75rem;
+  }
+  .agent-card-body h4 {
+    font-family: var(--type-mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 0.75rem;
+  }
+  .tools-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin-bottom: 1.25rem;
+  }
+  .tools-list li {
+    font-size: 0.9rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    line-height: 1.4;
+    color: var(--ink-mid);
+  }
+  .tools-list li::before {
+    content: '\2192';
+    color: var(--ink-faint);
+    flex-shrink: 0;
+    font-family: var(--type-mono);
+    font-size: 0.8rem;
+    margin-top: 1px;
+  }
+  .use-cases {
+    background: var(--bg-tint);
+    border-radius: 3px;
+    padding: 1rem 1.25rem;
+  }
+  .use-cases h4 {
+    margin-bottom: 0.5rem;
+  }
+  .use-cases p {
+    font-size: 0.9rem;
+    color: var(--ink-mid);
+    line-height: 1.5;
+  }
+
+  /* COLOUR ACCENTS PER TYPE */
+  .type-user .agent-card-type { color: var(--blue); }
+  .type-user .agent-card-header {
+    border-left: 3px solid var(--blue);
+    padding-left: calc(1.75rem - 3px);
+  }
+  .type-workflow .agent-card-type { color: var(--green); }
+  .type-workflow .agent-card-header {
+    border-left: 3px solid var(--green);
+    padding-left: calc(1.75rem - 3px);
+  }
+  .type-autonomous .agent-card-type { color: var(--purple); }
+  .type-autonomous .agent-card-header {
+    border-left: 3px solid var(--purple);
+    padding-left: calc(1.75rem - 3px);
+  }
+
+  /* COMPARISON TABLE */
+  .comparison-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+  }
+  .comparison-table th {
+    font-family: var(--type-mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-light);
+    text-align: left;
+    padding: 0.75rem 1rem;
+    border-bottom: 2px solid var(--ink);
+    white-space: nowrap;
+  }
+  .comparison-table td {
+    padding: 0.9rem 1rem;
+    border-bottom: 1px solid var(--rule);
+    vertical-align: top;
+    line-height: 1.45;
+    color: var(--ink-mid);
+  }
+  .comparison-table td:first-child {
+    font-weight: 600;
+    color: var(--ink);
+    white-space: nowrap;
+  }
+  .comparison-table tr:hover td { background: var(--bg-warm); }
+  .table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+  }
+  .badge {
+    display: inline-block;
+    font-family: var(--type-mono);
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 2px 7px;
+    border-radius: 2px;
+    font-weight: 500;
+  }
+  .badge-low { background: var(--green-soft); color: var(--green); }
+  .badge-med { background: var(--amber-soft); color: var(--amber); }
+  .badge-high { background: var(--accent-soft); color: var(--accent); }
+  .badge-var { background: var(--bg-tint); color: var(--ink-light); }
+
+  /* DECISION GUIDE */
+  .decision-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+  }
+  @media (max-width: 700px) { .decision-grid { grid-template-columns: 1fr; } }
+  .decision-card {
+    background: var(--bg-warm);
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    padding: 1.5rem;
+  }
+  .decision-q {
+    font-family: var(--type-display);
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    line-height: 1.35;
+    color: var(--ink);
+  }
+  .decision-a {
+    font-size: 0.9rem;
+    color: var(--ink-mid);
+    line-height: 1.6;
+  }
+  .decision-a strong { color: var(--ink); }
+
+  /* COST SECTION */
+  .cost-row {
+    display: grid;
+    grid-template-columns: 200px 1fr auto;
+    gap: 1rem;
+    align-items: baseline;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--rule);
+    font-size: 0.92rem;
+  }
+  .cost-row:last-child { border-bottom: none; }
+  .cost-platform { font-weight: 600; color: var(--ink); }
+  .cost-detail { color: var(--ink-mid); line-height: 1.5; }
+  @media (max-width: 700px) {
+    .cost-row { grid-template-columns: 1fr; gap: 0.4rem; }
+  }
+
+  /* PLATFORM DETAIL CARDS */
+  .api-card {
+    background: var(--bg-tint);
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    padding: 1.5rem 1.75rem;
+    margin-bottom: 1rem;
+  }
+  .api-card h3 {
+    font-family: var(--type-display);
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: var(--ink);
+  }
+  .api-card p {
+    font-size: 0.92rem;
+    color: var(--ink-mid);
+    line-height: 1.6;
+    margin-bottom: 0.75rem;
+  }
+  .code-inline {
+    font-family: var(--type-mono);
+    font-size: 0.82rem;
+    background: #e8e5e0;
+    padding: 2px 6px;
+    border-radius: 2px;
+    color: var(--ink-mid);
+  }
+  .pros-cons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-top: 0.75rem;
+  }
+  @media (max-wid
